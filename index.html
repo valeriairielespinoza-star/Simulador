@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de exámenes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--tx:#1d2330;--mu:#737a88;--ac:#1f6f6b;--ac2:#e4f1ef;--bd:#e7e2d9;--ok:#2f855a;--mid:#c27a16;--bad:#c0392b;--r:16px;--sh:0 1px 2px rgba(20,25,40,.05),0 8px 24px rgba(20,25,40,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#101418;--card:#181e25;--tx:#eaeef3;--mu:#94a0b0;--ac:#4fb3ac;--ac2:#16312f;--bd:#27303a;--ok:#5fcf93;--mid:#f0b45a;--bad:#f07d70;--sh:none}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 Inter,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{max-width:760px;margin:0 auto;padding:28px 18px 8px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+h1,.big{font-family:Fraunces,Georgia,serif}
+h1{margin:0;font-size:1.8rem;line-height:1.1}h1 span{color:var(--ac)}
+.tag{color:var(--mu);font-size:.9rem;margin-top:4px}
+nav{display:flex;gap:6px}
+nav button{background:transparent;color:var(--mu);border:0;padding:8px 12px;border-radius:99px;font-weight:600;cursor:pointer}
+nav button.on{background:var(--ac2);color:var(--ac)}
+main{max-width:760px;margin:0 auto;padding:10px 18px 60px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh)}
+label{display:block;font-weight:600;font-size:.88rem;margin:0 0 6px}
+input,textarea,select{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1.5px solid var(--bd);border-radius:12px;padding:12px 14px;outline:0;transition:.15s}
+input:focus,textarea:focus,select:focus{border-color:var(--ac)}
+textarea{min-height:100px;resize:vertical}#notes{min-height:140px}
+.f{margin-bottom:16px}.row{display:flex;gap:12px}.row>*{flex:1}
+.drop{border:2px dashed var(--bd);border-radius:14px;padding:22px;text-align:center;color:var(--mu);cursor:pointer;transition:.15s;display:block}
+.drop:hover{border-color:var(--ac);color:var(--ac);background:var(--ac2)}.drop input{display:none}
+.btn{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 22px;background:var(--ac);color:#fff;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.08)}.btn:disabled{opacity:.5}
+.btn.s{background:transparent;color:var(--tx);border:1.5px solid var(--bd)}
+.bar{display:flex;gap:10px;flex-wrap:wrap}
+.msg{color:var(--mu);font-size:.9rem;margin-top:8px;min-height:1.2em}.err{color:var(--bad)}
+.prog{height:6px;background:var(--bd);border-radius:9px;overflow:hidden;margin:0 0 14px}.prog i{display:block;height:100%;width:0;background:var(--ac);transition:.3s}
+.q{font-weight:600;margin:0 0 12px;display:flex;gap:10px}.n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--ac2);color:var(--ac);display:grid;place-items:center;font-size:.85rem}
+.k{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin:12px 0 2px;font-weight:600}
+.big{font-size:3rem;font-weight:700;line-height:1}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:600;background:var(--ac2);color:var(--ac)}
+.ok{color:var(--ok)}.mid{color:var(--mid)}.bad{color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chip{background:var(--ac2);color:var(--ac);border-radius:99px;padding:4px 12px;font-size:.85rem}
+.hi{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--bd)}.hi:last-child{border:0}
+.av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--ac2);flex:none}
+.say{display:flex;gap:14px;align-items:center;background:var(--ac2);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
+.say img{width:68px;height:68px;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--card)}
+.say b{display:block;font-family:Fraunces,Georgia,serif;font-size:1.1rem;line-height:1.25}
+.say span{color:var(--mu);font-size:.85rem}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;gap:12px;align-items:center"><img class="av" src="doctor.jpg" alt="Doctor Carlos Jr"><div><h1>Simulador <span>de exámenes</span></h1><div class="tag">Practica con el Doctor Carlos Jr.</div></div></div>
+  <nav><button id="t1" class="on">Examen</button><button id="t2">Progreso</button></nav>
+</header>
+<main>
+<section id="setup">
+  <div class="card">
+    <div class="f"><label>Tema del examen</label><input id="topic" placeholder="Ej: Tractos de la médula espinal"></div>
+    <div class="f"><label>Tus apuntes en PDF</label>
+      <label class="drop" for="pdf">📄 Toca para subir tu guía (puedes elegir varios PDF)<input id="pdf" type="file" accept="application/pdf" multiple></label>
+      <div id="pm" class="msg"></div></div>
+    <div class="f"><label>Texto de los apuntes (se llena solo; también puedes pegar o editar)</label><textarea id="notes"></textarea></div>
+    <div class="row f">
+      <div><label>Preguntas</label><select id="n"><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option></select></div>
+      <div><label>Enfoque</label><select id="mode"><option value="all">Todo el tema</option><option value="weak">Reforzar mis fallos</option></select></div>
+    </div>
+    <div id="codef" class="f hide"><label>Código de acceso</label><input id="code" type="password" placeholder="El código que configuraste"></div>
+    <div class="bar"><button class="btn" id="gen">Generar examen</button></div><div id="m1" class="msg"></div>
+  </div>
+</section>
+<section id="exam" class="hide"><div class="say"><img src="doctor.jpg" alt=""><div><b>¡Bienvenido a los juzgados!</b><span>Doctor Carlos Jr.</span></div></div><div class="prog"><i id="pg"></i></div><h2 id="et" style="font-family:Fraunces,serif;margin:0 0 14px"></h2><div id="qs"></div>
+  <div class="bar"><button class="btn" id="grade">Corregir mi examen</button><button class="btn s" id="b1">Cancelar</button></div><div id="m2" class="msg"></div></section>
+<section id="result" class="hide">
+  <div class="card"><div class="k" style="margin-top:0">Nota estimada</div><div class="big" id="tot"></div><p id="sum" style="margin:10px 0 0"></p><div class="chips" id="weak"></div></div>
+  <div id="rs"></div><div class="say"><img src="doctor.jpg" alt=""><div><b>Siempre pa lante porque pa atrás asustan</b><span>Doctor Carlos Jr.</span></div></div><div class="bar"><button class="btn" id="again">Otro examen</button><button class="btn s" id="b2">Cambiar tema</button></div>
+</section>
+<section id="prog" class="hide">
+  <div class="card"><div class="k" style="margin-top:0">Temas a reforzar (más frecuentes)</div><div class="chips" id="pw"></div></div>
+  <div class="card"><div class="k" style="margin-top:0">Historial</div><div id="hist"></div></div>
+  <button class="btn s" id="clr">Borrar historial</button>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const STYLE=`Eres el Doctor Carlos Jr., docente de anatomía y neuroanatomía del estudiante. Redactas y corriges exámenes imitando exactamente el estilo de evaluación descrito.
+PERSONALIDAD: trato cercano y amigable, de tú, cálido y motivador, con humor suave. Mantienes el rigor: no regalas notas. En la corrección y el resumen reconoce primero lo que el estudiante sí sabe y luego señala lo que faltó. Las preguntas del examen siguen siendo cortas y formales.
+ESTILO: preguntas cortas de una sola línea, en español directo. Verbos: "Diga" (el más usado), "Defina", "Mencione", "Clasifique", "Describa", "¿Qué es...?". Predominan las de clasificación. Incluye al menos: una "Clasifique/Mencione X y defina/describa uno de ellos"; una con subincisos a) y b) sobre términos comparables u opuestos; una de completar ("La estructura X es de tipo: ___"); una de funciones; una de definición. Nivel memorístico y de comprensión básica, sin casos clínicos ni análisis. Sigue el orden del temario y cubre los subtemas de forma pareja.
+EJEMPLOS REALES: "Defina posición anatómica." / "En la terminología anatómica diga a qué nos referimos con: a) Caudal b) Proximal." / "Mencione cuáles son los planos del cuerpo humano y describa uno de ellos." / "Diga cómo se clasifican los huesos y defina uno de ellos." / "La articulación dento-alveolar es una articulación de tipo: ___" / "Diga las funciones de: a) células de Schwann b) oligodendrocitos." / "¿Qué es circunducción?"
+REGLA: usa SOLO los apuntes entregados. No inventes nada que no esté en ellos.`;
+const $=i=>document.getElementById(i);let exam=null,needCode=false;
+const H=()=>{try{return JSON.parse(localStorage.getItem("hist")||"[]")}catch(e){return[]}};
+const saveH=h=>{try{localStorage.setItem("hist",JSON.stringify(h.slice(-50)))}catch(e){}};
+const esc=t=>{const d=document.createElement("div");d.textContent=t==null?"":String(t);return d.innerHTML};
+function show(id){["setup","exam","result","prog"].forEach(s=>$(s).classList.toggle("hide",s!==id));$("t1").classList.toggle("on",id!=="prog");$("t2").classList.toggle("on",id==="prog");scrollTo(0,0)}
+try{$("code").value=localStorage.getItem("code")||""}catch(e){}
+async function ai(prompt){
+  const r=await fetch("/api/claude",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt,code:$("code").value})});
+  const d=await r.json().catch(()=>({}));
+  if(r.status===401){$("codef").classList.remove("hide");throw new Error(d.error||"Código incorrecto.")}
+  if(!r.ok)throw new Error(d.error||"Algo falló.");
+  try{localStorage.setItem("code",$("code").value)}catch(e){}
+  const t=d.text.replace(/```json|```/g,"").trim();return JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1));
+}
+async function readPdf(f){const l=window.pdfjsLib;l.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const doc=await l.getDocument({data:await f.arrayBuffer()}).promise;let o="";
+  for(let p=1;p<=doc.numPages;p++){const tc=await(await doc.getPage(p)).getTextContent();o+=tc.items.map(i=>i.str).join(" ")+"\n"}return o}
+$("pdf").onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;$("pm").textContent="Leyendo PDF...";let all="",bad=[];
+  for(const f of fs){try{const t=(await readPdf(f)).replace(/[ \t]+/g," ").trim();t.length<100?bad.push(f.name):all+=t+"\n\n"}catch(x){bad.push(f.name)}}
+  if(all)$("notes").value=all.trim();
+  $("pm").innerHTML=(all?"✓ "+all.length.toLocaleString()+" caracteres leídos. ":"")+(bad.length?'<span class="err">Sin texto legible en: '+esc(bad.join(", "))+" (¿PDF escaneado?)</span>":"")};
+async function gen(){
+  const notes=$("notes").value.trim(),topic=$("topic").value.trim(),n=$("n").value;
+  if(notes.length<200){$("m1").innerHTML='<span class="err">Sube un PDF o pega apuntes más completos.</span>';return}
+  let focus="";if($("mode").value==="weak"){const w=weakList(topic);if(w.length)focus=`\nENFOQUE: al menos la mitad de las preguntas deben cubrir estos temas que el estudiante falla: ${w.slice(0,6).join("; ")}.`}
+  $("gen").disabled=true;$("m1").textContent="El Doctor Carlos Jr. está armando tu examen...";
+  try{const r=await ai(`${STYLE}\n\nTAREA: examen de ${n} preguntas${topic?` sobre "${topic}"`:""} usando solo estos apuntes. Sin respuestas.${focus}\nResponde SOLO JSON: {"title":"...","questions":["...","..."]}\n\nAPUNTES:\n${notes.slice(0,60000)}`);
+    if(!Array.isArray(r.questions)||!r.questions.length)throw new Error("Respuesta inválida, intenta de nuevo.");
+    exam={title:r.title||topic||"Examen",questions:r.questions,notes,topic};
+    $("et").textContent=exam.title;
+    $("qs").innerHTML=exam.questions.map((q,i)=>`<div class="card"><p class="q"><span class="n">${i+1}</span><span>${esc(q)}</span></p><textarea class="a" placeholder="Tu respuesta..."></textarea></div>`).join("");
+    document.querySelectorAll(".a").forEach(a=>a.oninput=()=>{const d=[...document.querySelectorAll(".a")].filter(x=>x.value.trim()).length;$("pg").style.width=d/exam.questions.length*100+"%"});
+    $("pg").style.width="0";$("m2").textContent="";show("exam");
+  }catch(e){$("m1").innerHTML='<span class="err">'+esc(e.message)+"</span>"}
+  $("gen").disabled=false}
+async function grade(){
+  const ans=[...document.querySelectorAll(".a")].map(a=>a.value.trim());
+  $("grade").disabled=true;$("m2").textContent="El Doctor Carlos Jr. está revisando tu examen...";
+  const qa=exam.questions.map((q,i)=>`${i+1}) PREGUNTA: ${q}\nRESPUESTA: ${ans[i]||"(en blanco)"}`).join("\n\n");
+  try{const r=await ai(`${STYLE}\n\nTAREA: corrige con rigor de docente comparando con los apuntes. Puntúa 0-10 cada pregunta (en blanco = 0).\nResponde SOLO JSON: {"results":[{"score":0,"missing":"qué faltó","terminology":"errores de terminología o 'Sin errores'","expected":"respuesta completa esperada según los apuntes"}],"summary":"2 frases de balance","weak":["tema a reforzar"]}\nExactamente ${exam.questions.length} elementos en results, en orden.\n\nAPUNTES:\n${exam.notes.slice(0,60000)}\n\nEXAMEN:\n${qa}`);
+    if(!Array.isArray(r.results))throw new Error("Respuesta inválida, intenta de nuevo.");
+    const sc=exam.questions.map((_,i)=>Math.max(0,Math.min(10,Number((r.results[i]||{}).score)||0)));const avg=sc.reduce((a,b)=>a+b,0)/sc.length;
+    const c=avg>=7?"ok":avg>=4?"mid":"bad";$("tot").innerHTML=`<span class="${c}">${avg.toFixed(1)}</span><span style="font-size:1.2rem;color:var(--mu)"> / 10</span>`;
+    $("sum").textContent=r.summary||"";$("weak").innerHTML=(r.weak||[]).map(w=>`<span class="chip">${esc(w)}</span>`).join("");
+    $("rs").innerHTML=exam.questions.map((q,i)=>{const x=r.results[i]||{},s=sc[i],k=s>=7?"ok":s>=4?"mid":"bad";
+      return `<div class="card"><p class="q"><span class="n">${i+1}</span><span>${esc(q)} <b class="${k}">· ${s}/10</b></span></p><div class="k">Qué faltó</div>${esc(x.missing)}<div class="k">Terminología</div>${esc(x.terminology)}<div class="k">Respuesta esperada</div>${esc(x.expected)}</div>`}).join("");
+    const h=H();h.push({d:Date.now(),topic:exam.topic||exam.title,score:+avg.toFixed(1),weak:r.weak||[]});saveH(h);show("result");
+  }catch(e){$("m2").innerHTML='<span class="err">'+esc(e.message)+"</span>"}
+  $("grade").disabled=false}
+function weakList(t){const c={};H().filter(x=>!t||x.topic===t).slice(-10).forEach(x=>x.weak.forEach(w=>c[w]=(c[w]||0)+1));return Object.keys(c).sort((a,b)=>c[b]-c[a])}
+function prog(){const h=H();$("pw").innerHTML=weakList("").slice(0,10).map(w=>`<span class="chip">${esc(w)}</span>`).join("")||'<span class="msg">Aún no hay datos.</span>';
+  $("hist").innerHTML=h.slice().reverse().map(x=>`<div class="hi"><div><b>${esc(x.topic)}</b><div class="msg" style="margin:0">${new Date(x.d).toLocaleDateString("es")}</div></div><span class="pill">${x.score}/10</span></div>`).join("")||'<span class="msg">Aún no hay exámenes.</span>';show("prog")}
+$("gen").onclick=gen;$("grade").onclick=grade;$("again").onclick=gen;$("b1").onclick=$("b2").onclick=()=>show("setup");
+$("t1").onclick=()=>show(exam&&!$("exam").classList.contains("hide")?"exam":"setup");$("t2").onclick=prog;
+$("clr").onclick=()=>{if(confirm("¿Borrar todo el historial?")){saveH([]);prog()}};
+</script>
+</body>
+</html>
